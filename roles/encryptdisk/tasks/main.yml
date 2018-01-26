@@ -36,3 +36,16 @@
 
   - name: mount the /dev/mapper/{{ luks_name }}
     mount: name=/{{ luks_name }} src=/dev/mapper/{{ luks_name }} fstype=xfs state=mounted
+
+  - name: copying the key file
+    template:
+      src: "{{ luks_key }}"
+      dest: /root/keyfile
+      owner: root
+      group: root
+      mode: 0600
+    when: addkey
+  
+  - name: add new keyslot to encrypted disk
+    shell: echo {{ luks_pass }} | cryptsetup luksAddKey {{ luks_dev }} /root/keyfile
+    when: addkey
